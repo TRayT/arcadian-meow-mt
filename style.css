@@ -1,0 +1,20 @@
+/*
+   Sets canvas as the background element
+   Allows all other elements to stack atop it
+   Imports a font to assure consistency
+*/
+@import url(https://fonts.googleapis.com/css?family=Oswald);
+
+html {
+		overflow: hidden;
+		font-family: 'Oswald', sans-serif;
+}
+body {
+		margin: auto;
+}
+canvas {
+		position: absolute;
+		z-index: -1;
+		top: 0;
+		left: 0;
+}
