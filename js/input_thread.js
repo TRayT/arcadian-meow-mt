@@ -1,4 +1,4 @@
-var physics, last;
+var physics, last, callback;
 
 var deadzone = 0.2;
 
@@ -8,7 +8,12 @@ function init( e ) {
 		physics = e.data.physics;
 		//Prepare for new messages
 		self.onmessage = render_message;
+		callback = setInterval( request, 10 );
 		last = Date.now();
+}
+
+function request() {
+		self.postMessage( true );
 }
 
 function render_message( e ) {
@@ -16,8 +21,10 @@ function render_message( e ) {
 		var dt = ( now - last ) / 100;
 		switch( e.data.type ) {
 		case 'stop':
-				self.onmessage = function(){};
+				clearInterval( callback );
 				break;
+		case 'start':
+				callback = setInterval( request, 10 );
 		default:
 				var x = e.data.x, y = e.data.y;
 				if( ( x > deadzone || x < -deadzone ) ||
@@ -26,7 +33,6 @@ function render_message( e ) {
 						var uy = y * Math.sqrt(1 - x * x / 2) * dt; //unit y with dt
 						physics.postMessage( { x: -ux, y: uy } );
 				}
-				self.postMessage( true );
 		}
 		last = now;
 }

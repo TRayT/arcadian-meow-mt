@@ -1,8 +1,9 @@
 var physics, input, scene, renderer, last, camera, callback, mesh = [];
+var render_stat, input_stat, physics_stat
 var k, last_k;
 
 //Delta time for physics simulation
-var phy_dt = 1/30;
+var phy_dt = 1/20;
 
 function Kinematic_frame( time, pos, rot ) {
 		this.time = time + phy_dt;
@@ -20,6 +21,17 @@ function Kinematic_frame( time, pos, rot ) {
 }
 
 function init(){
+		//Setup stat components
+		render_stat = new Stats();
+		render_stat.domElement.id = "render_stat";
+		input_stat = new Stats();
+		input_stat.domElement.id = "input_stat";
+		physics_stat = new Stats();
+		physics_stat.domElement.id = "physics_stat";
+		
+		document.body.appendChild( render_stat.domElement );
+		document.body.appendChild( input_stat.domElement );
+		document.body.appendChild( physics_stat.domElement );
 		//Create channel for workers to communicate with
 		var channel = new MessageChannel();
 		//Initialize input worker
@@ -30,6 +42,8 @@ function init(){
 				if( gp ){
 						input.postMessage( { x: gp.axes[0], y: gp.axes[1] } );
 				}
+				input_stat.end();
+				input_stat.begin();
 		}
 		//Initialize physics worker
 		physics = new Worker( 'js/physics_thread.js' );
@@ -38,6 +52,8 @@ function init(){
 		physics.onmessage = function( e ) {
 				if( k ){ last_k = k; }
 				k = new Kinematic_frame( e.data.time, e.data.positions, e.data.quaternions );
+				physics_stat.end();
+				physics_stat.begin();
 		}
 		//Create scene
 		scene = new THREE.Scene();
@@ -78,6 +94,8 @@ function init(){
 
 function start() {
 		last = Date.now();
+		input_stat.begin();
+		physics_stat.begin();
 		input.postMessage( { type: 'start' } );
 		physics.postMessage( { type: 'start' } );
 		render();
@@ -90,6 +108,8 @@ function stop() {
 }
 
 function render() {
+		render_stat.begin();
+		callback = requestAnimationFrame( render );
 		var now = Date.now();
 		var dt = now - last;
 
@@ -103,10 +123,9 @@ function render() {
 		}
 		
 		camera.position.set( mesh[0].position.x, mesh[0].position.y + 5, mesh[0].position.z + 3 );
-		
-    callback = requestAnimationFrame( render );
     renderer.render(scene, camera);
 		last = now;
+		render_stat.end();
 }
 
 init();

@@ -18,3 +18,18 @@ canvas {
 		top: 0;
 		left: 0;
 }
+
+#render_stat::before {
+		content: "Render";
+		color: white;
+}
+
+#input_stat::before {
+		content: "Input";
+		color: white;
+}
+
+#physics_stat::before {
+		content: "Physics";
+		color: white;
+}
