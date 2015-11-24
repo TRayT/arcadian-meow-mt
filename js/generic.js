@@ -1,6 +1,7 @@
 var physics, input, scene, renderer, last, camera, callback, mesh = [];
 var k, last_k;
 
+//Delta time for physics simulation
 var phy_dt = 1/30;
 
 function Kinematic_frame( time, pos, rot ) {
@@ -88,22 +89,11 @@ function stop() {
 		cancelAnimationFrame( callback );
 }
 
-function update_meshes( lerp ) {
-		//update each mesh
-		for( var i = 0; i !== mesh.length; i++ ) {
-				if( !mesh[i].position.equals( kinematics.positions[i] ) ) {
-						mesh[i].position.lerp( kinematics.positions[i], lerp );
-				}
-				if( !mesh[i].quaternion.equals( kinematics.quaternions[i] ) ) {
-						mesh[i].quaternion.slerp( kinematics.quaternions[i], lerp );
-				}
-		}
-}
-
 function render() {
 		var now = Date.now();
 		var dt = now - last;
 
+		//Update each mesh
 		if( last_k ) {
 				var lerp = ( now - last_k.time ) / ( k.time - last_k.time );
 				for( var i = 0; i !== mesh.length; i++ ) {
@@ -111,8 +101,8 @@ function render() {
 						THREE.Quaternion.slerp( last_k.quaternions[i], k.quaternions[i], mesh[i].quaternion, lerp );
 				}
 		}
+		
 		camera.position.set( mesh[0].position.x, mesh[0].position.y + 5, mesh[0].position.z + 3 );
-		//camera.lookAt( mesh[0].position );
 		
     callback = requestAnimationFrame( render );
     renderer.render(scene, camera);

@@ -74,7 +74,6 @@ function input_message( e ) {
 }
 
 function tick() {
-		//console.log( world.bodies[0].velocity );
 		// Step the world
 		world.step( dt );
 
