@@ -1,9 +1,9 @@
-var physics, input, scene, renderer, last, camera, callback, mesh = [];
+var physics, input, scene, renderer, last, camera, camera_offset, callback, mesh = [];
 var render_stat, input_stat, physics_stat
 var k, last_k;
 
 //Delta time for physics simulation
-var phy_dt = 1/20;
+var phy_dt = 1/30;
 
 function Kinematic_frame( time, pos, rot ) {
 		this.time = time + phy_dt;
@@ -17,6 +17,27 @@ function Kinematic_frame( time, pos, rot ) {
 																										 rot[ 4 * i + 1 ],
 																										 rot[ 4 * i + 2 ],
 																										 rot[ 4 * i + 3 ] ) );
+		}
+}
+
+function update_camera() {
+		camera.position.addVectors( mesh[0].position, camera_offset );
+		camera.lookAt( mesh[0].position );
+}
+
+function input_message( e ) {
+		switch ( e.data.type ) {
+		case 'get':
+				var gp = navigator.getGamepads()[ 0 ];
+				if( gp ) {
+						input.postMessage( { lx: gp.axes[ 0 ], ly: gp.axes[ 1 ],
+																 rx: gp.axes[ 2 ], ry: gp.axes[ 3 ] } );
+				}
+				input_stat.end();
+				input_stat.begin();
+				break;
+		case 'camera':
+				camera_offset.set( e.data.x, e.data.y, e.data.z );
 		}
 }
 
@@ -37,14 +58,7 @@ function init(){
 		//Initialize input worker
 		input = new Worker( 'js/input_thread.js' );
 		input.postMessage( { physics: channel.port1 }, [ channel.port1 ] );
-		input.onmessage = function( e ) {
-				var gp = navigator.getGamepads()[0];
-				if( gp ){
-						input.postMessage( { x: gp.axes[0], y: gp.axes[1] } );
-				}
-				input_stat.end();
-				input_stat.begin();
-		}
+		input.onmessage = input_message;
 		//Initialize physics worker
 		physics = new Worker( 'js/physics_thread.js' );
 		physics.postMessage( { cannon_url: 'cannon.min.js', input: channel.port2, dt: phy_dt },
@@ -72,8 +86,8 @@ function init(){
 		scene.add( sphere );
 		mesh.push( sphere );
 		//Ground geometry
-		var ground = new THREE.Mesh( new THREE.PlaneBufferGeometry( 250, 250 ),
-																 new THREE.MeshBasicMaterial( { color: 0x999999 } ) );
+		material = new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'asset/grid.png' ) } );
+		var ground = new THREE.Mesh( new THREE.PlaneBufferGeometry( 100, 100 ), material );
 		scene.add( ground );
 		mesh.push( ground );
 		// Create 80 cubes
@@ -86,8 +100,7 @@ function init(){
 		//Camera setup
 		camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
 		camera.up.set( 0, 0, 1 );
-		camera.position.set( 0, 5, 3 );
-		camera.lookAt( sphere.position );
+		camera_offset = new THREE.Vector3( 0, 5, 3 );
 		//Start everything
 		start();
 }
@@ -122,7 +135,7 @@ function render() {
 				}
 		}
 		
-		camera.position.set( mesh[0].position.x, mesh[0].position.y + 5, mesh[0].position.z + 3 );
+		update_camera();
     renderer.render(scene, camera);
 		last = now;
 		render_stat.end();
