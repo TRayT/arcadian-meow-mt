@@ -86,7 +86,7 @@ function init(){
 		scene.add( sphere );
 		mesh.push( sphere );
 		//Ground geometry
-		material = new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'asset/grid.png' ) } );
+		material = new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'asset/image/grid.png' ) } );
 		var ground = new THREE.Mesh( new THREE.PlaneBufferGeometry( 100, 100 ), material );
 		scene.add( ground );
 		mesh.push( ground );
