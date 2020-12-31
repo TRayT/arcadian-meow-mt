@@ -5,7 +5,7 @@ const initializeThreads = ( data ) => {
 	let WebGL = new ArrayBuffer( 1 ) // temporary
 	if( !data ) data = {}
 
-	const agency = AgencyHandler( a2d.port1, "agency.js" )
+	const [ agency, buffer ] = AgencyHandler( a2d.port1, "agency.js" )
 	
 	const dynamics = new Worker( data.dynamicsURL || 'dynamics.js' )
 	dynamics.postMessage( { agency: a2d.port2, render: d2r.port1 }, [ a2d.port2, d2r.port1 ] )
@@ -16,9 +16,9 @@ const initializeThreads = ( data ) => {
 	render.postMessage( { dynamics: d2r.port2, context: WebGL }, [ d2r.port2, WebGL ] )
 	render.onmessage = console.log
 	
-	return { agency: agency, dynamics: dynamics, render: render }	
+	return { agency: agency, dynamics: dynamics, render: render, buffer: buffer }
 }
 
-initializeThreads()
+let tester = initializeThreads()
 
 console.log( "Waiting for errors..." )
