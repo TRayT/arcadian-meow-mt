@@ -1,0 +1,22 @@
+html {
+		overflow: hidden;
+		font-family: sans-serif;
+		background: #222222;
+}
+body {
+		margin: auto;
+}
+canvas {
+		position: absolute;
+		z-index: -1;
+		top: 0;
+		left: 0;
+}
+#log {
+	postition: absolute;
+	top: 0;
+	right: 0;
+	margin: 1em;
+	width: 48em;
+}
+
